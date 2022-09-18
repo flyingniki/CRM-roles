@@ -1,5 +1,5 @@
 <?php
-//
+
 use Bitrix\Main\Diag\Debug;
 
 class CEstelabFunctions

@@ -1,5 +1,5 @@
 <?php
-//
+
 /** @noinspection ReturnTypeCanBeDeclaredInspection */
 /** @noinspection PhpMissingReturnTypeInspection */
 /** @noinspection NullCoalescingOperatorCanBeUsedInspection */
