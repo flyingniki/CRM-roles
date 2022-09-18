@@ -37,5 +37,6 @@ array_unshift($result, ['<b>Группа/Отдел</b>', '<b>Роль</b>', '<b
 // print_r($result);
 // echo '</pre>';
 $xlsx = Shuchkin\SimpleXLSXGen::fromArray($result, 'CRM Perms');
-$xlsx->downloadAs('CRM Perms.xlsx');
+$title = 'CRM Permissions ' . date("m.d.Y H.i.s");
+$xlsx->downloadAs($title . '.xlsx');
 require($_SERVER["DOCUMENT_ROOT"] . "/bitrix/footer.php");
