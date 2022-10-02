@@ -4,9 +4,6 @@ use \Bitrix\Crm\Service;
 
 class crmRules
 {
-
-    private $rolesInfo;
-
     private function getRoles()
     {
         global $USER;
@@ -108,7 +105,7 @@ class crmRules
                 endif;
             endforeach;
         endforeach;
-        $this->rolesInfo = $arRolesInfo;
+        return $arRolesInfo;
     }
 
     public function getPerms($roleID)
@@ -366,7 +363,7 @@ class crmRules
         );
 
         foreach ($arResult['ENTITY'] as $entityType => $entityName) :
-            // echo '<b>Сущность:</b> ' . $entityType . ' => ' . $entityName . '<br>';
+            //   echo '<b>Сущность:</b> ' . $entityType . ' => ' . $entityName . '<br>';
 
             if (in_array('READ', $arResult['ENTITY_PERMS'][$entityType])) :
                 foreach ($arResult['ROLE_PERM'][$entityType] as $rolePermAtr => $rolePermName) :
@@ -375,10 +372,8 @@ class crmRules
                     endif;
                     // echo ($rolePermAtr == $arResult['ROLE_PERMS'][$entityType]['READ']['-'] ? '<b>Атрибут для READ:</b> ' . $rolePermName . '<br>' : '');
                     if ($rolePermAtr == $arResult['ROLE_PERMS'][$entityType]['READ']['-']) :
-                        // echo '<b>Атрибут для READ:</b> ' . $rolePermName . '<br>';
+                        //          echo '<b>Атрибут для READ:</b> ' . $rolePermName . '<br>';
                         $entityPerms[$entityName]['READ'] = $rolePermName;
-                    // else :
-                    // echo '';
                     endif;
                 endforeach;
             endif;
@@ -390,10 +385,8 @@ class crmRules
                     endif;
                     // echo ($rolePermAtr == $arResult['ROLE_PERMS'][$entityType]['ADD']['-'] ? '<b>Атрибут для  ADD:</b> ' . $rolePermName . '<br>' : '');
                     if ($rolePermAtr == $arResult['ROLE_PERMS'][$entityType]['ADD']['-']) :
-                        // echo '<b>Атрибут для ADD:</b> ' . $rolePermName . '<br>';
+                        //           echo '<b>Атрибут для ADD:</b> ' . $rolePermName . '<br>';
                         $entityPerms[$entityName]['ADD'] = $rolePermName;
-                    // else :
-                    // echo '';
                     endif;
                 endforeach;
             endif;
@@ -405,10 +398,8 @@ class crmRules
                     endif;
                     // echo ($rolePermAtr == $arResult['ROLE_PERMS'][$entityType]['WRITE']['-'] ? '<b>Атрибут для  WRITE:</b> ' . $rolePermName . '<br>' : '');
                     if ($rolePermAtr == $arResult['ROLE_PERMS'][$entityType]['WRITE']['-']) :
-                        // echo '<b>Атрибут для WRITE:</b> ' . $rolePermName . '<br>';
+                        //      echo '<b>Атрибут для WRITE:</b> ' . $rolePermName . '<br>';
                         $entityPerms[$entityName]['WRITE'] = $rolePermName;
-                    // else :
-                    // echo '';
                     endif;
                 endforeach;
             endif;
@@ -420,13 +411,29 @@ class crmRules
                     endif;
                     // echo ($rolePermAtr == $arResult['ROLE_PERMS'][$entityType]['DELETE']['-'] ? '<b>Атрибут для  DELETE:</b> ' . $rolePermName . '<br><br>' : '');
                     if ($rolePermAtr == $arResult['ROLE_PERMS'][$entityType]['DELETE']['-']) :
-                        // echo '<b>Атрибут для DELETE:</b> ' . $rolePermName . '<br><br>';
+                        //       echo '<b>Атрибут для DELETE:</b> ' . $rolePermName . '<br><br>';
                         $entityPerms[$entityName]['DELETE'] = $rolePermName;
-                    // else :
-                    // echo '';
                     endif;
                 endforeach;
             endif;
+
+            foreach ($arResult['ROLE_PERMS'][$entityType]['READ']['STAGE_ID'] as $subEntity => $attr) {
+                //  echo '<b>Стадия: ' . $arResult['ENTITY_FIELDS'][$entityType]['STAGE_ID'][$subEntity] . '</b> Атрибут для READ: ' . $rolePerms[$attr] . '<br>';
+                $entityPerms[$entityName][$arResult['ENTITY_FIELDS'][$entityType]['STAGE_ID'][$subEntity]]['READ'] = $rolePerms[$attr];
+            }
+            foreach ($arResult['ROLE_PERMS'][$entityType]['ADD']['STAGE_ID'] as $subEntity => $attr) {
+                // echo '<b>Стадия: ' . $arResult['ENTITY_FIELDS'][$entityType]['STAGE_ID'][$subEntity] . '</b> Атрибут для ADD: ' . $rolePerms[$attr] . '<br>';
+                $entityPerms[$entityName][$arResult['ENTITY_FIELDS'][$entityType]['STAGE_ID'][$subEntity]]['ADD'] = $rolePerms[$attr];
+            }
+            foreach ($arResult['ROLE_PERMS'][$entityType]['WRITE']['STAGE_ID'] as $subEntity => $attr) {
+                // echo '<b>Стадия: ' . $arResult['ENTITY_FIELDS'][$entityType]['STAGE_ID'][$subEntity] . '</b> Атрибут для WRITE: ' . $rolePerms[$attr] . '<br>';
+                $entityPerms[$entityName][$arResult['ENTITY_FIELDS'][$entityType]['STAGE_ID'][$subEntity]]['WRITE'] = $rolePerms[$attr];
+            }
+            foreach ($arResult['ROLE_PERMS'][$entityType]['DELETE']['STAGE_ID'] as $subEntity => $attr) {
+                //echo '<b>Стадия: ' . $arResult['ENTITY_FIELDS'][$entityType]['STAGE_ID'][$subEntity] . '</b> Атрибут для DELETE: ' . $rolePerms[$attr] . '<br>';
+                $entityPerms[$entityName][$arResult['ENTITY_FIELDS'][$entityType]['STAGE_ID'][$subEntity]]['DELETE'] = $rolePerms[$attr];
+            }
+        // echo '<br>';
         endforeach;
 
         return $entityPerms;
@@ -434,13 +441,12 @@ class crmRules
 
     public function crmPerms()
     {
-        $this->getRoles();
-        $rolesInfo = $this->rolesInfo;
+        $rolesInfo = $this->getRoles();
         // берем отсюда данные для Excel
         foreach ($rolesInfo as $roleGroup => $roleInfo) :
             foreach ($roleInfo as $roleID => $roleName) :
-                // echo $roleGroup . ' <b>ID роли:</b> ' . $roleID . ' <b>Название роли:</b> ' . $roleName . '<br>';
-                $perms[$roleGroup] = $this->getPerms($roleID);
+                //echo $roleGroup . ' <b>ID роли:</b> ' . $roleID . ' <b>Название роли:</b> ' . $roleName . '<br>';
+                $perms[$roleGroup][$roleName] = $this->getPerms($roleID);
             endforeach;
         endforeach;
         // echo '<pre>';

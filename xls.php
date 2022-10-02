@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 require($_SERVER["DOCUMENT_ROOT"] . "/bitrix/header.php");
 $APPLICATION->SetTitle("PHP to Excel");
@@ -13,26 +10,25 @@ $obj = new crmRules();
 $perms = $obj->crmPerms();
 
 //разбиваем массив в строки
-foreach ($perms as $groupName => $groupProps) {
-    $groupName = explode(': ', $groupName);
-    $groupName = implode(', ', $groupName);
-    foreach ($groupProps as $entity => $entityPerms) {
-        foreach ($entityPerms as $atr => $perm) {
-            $resultEntityPerms[] = [$groupName, $entity, $atr, $perm];
+foreach ($perms as $groupRoleGroupName => $arRolesNames) {
+    foreach ($arRolesNames as $roleName => $arEntities) {
+        foreach ($arEntities as $entityName => $arStages) {
+            if (count($arStages) == 4) {
+                foreach ($arStages as $operation => $perm) {
+                    $result[] = [$groupRoleGroupName, $roleName, $entityName, '', $operation, $perm];
+                }
+            } else {
+                $arStages = array_slice($arStages, 4);
+                foreach ($arStages as $stageName => $stageRules) {
+                    foreach ($stageRules as $operation => $perm) {
+                        $result[] = [$groupRoleGroupName, $roleName, $entityName, $stageName, $operation, $perm];
+                    }
+                }
+            }
         }
     }
 }
-
-foreach ($resultEntityPerms as $key => $value) {
-    foreach ($value as $item) {
-        $resultEntityPermsString[$key] = implode(', ', $value);
-    }
-}
-
-foreach ($resultEntityPermsString as $item) {
-    $result[] = explode(', ', $item);
-}
-array_unshift($result, ['<b>Группа/Отдел</b>', '<b>Роль</b>', '<b>Сущность</b>', '<b>Операция</b>', '<b>Правила</b>']);
+array_unshift($result, ['<b>Группа/Отдел</b>', '<b>Роль</b>', '<b>Сущность</b>', '<b>Стадия</b>', '<b>Операция</b>', '<b>Правила</b>']);
 // echo '<pre>';
 // print_r($result);
 // echo '</pre>';
